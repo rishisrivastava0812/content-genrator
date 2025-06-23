@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Content Generator</title>
+  <style>
+    /* Reset & basics */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      background: white;
+      max-width: 600px;
+      width: 100%;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgb(0 0 0 / 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 1.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
+    }
+
+    button {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background-color: #4f46e5;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #3730a3;
+    }
+
+    button:disabled {
+      background-color: #a3a3f7;
+      cursor: not-allowed;
+    }
+
+    .response {
+      margin-top: 2rem;
+      white-space: pre-wrap;
+      padding: 1rem;
+      background: #eef2ff;
+      border-radius: 8px;
+      min-height: 100px;
+      font-size: 1.1rem;
+      color: #333;
+      border: 1px solid #c7d2fe;
+    }
+
+    .loading {
+      margin-top: 1rem;
+      font-style: italic;
+      color: #666;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 1.5rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>AI Content Generator</h1>
+    <textarea id="promptInput" placeholder="Enter your prompt here..."></textarea>
+    <button id="generateBtn">Generate</button>
+    <div class="loading" id="loading" style="display:none;">Generating content...</div>
+    <div class="response" id="response"></div>
+  </div>
+
+  <script>
+    const promptInput = document.getElementById('promptInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const responseDiv = document.getElementById('response');
+    const loadingDiv = document.getElementById('loading');
+
+    generateBtn.addEventListener('click', async () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt) {
+        alert('Please enter a prompt!');
+        return;
+      }
+
+      // Clear previous response and show loading
+      responseDiv.textContent = '';
+      loadingDiv.style.display = 'block';
+      generateBtn.disabled = true;
+
+      try {
+        const res = await fetch('http://localhost:5000/api/generate-content', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt }),
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to generate content');
+        }
+
+        const data = await res.json();
+        responseDiv.textContent = data.result || 'No response';
+      } catch (err) {
+        responseDiv.textContent = 'Error: ' + err.message;
+      } finally {
+        loadingDiv.style.display = 'none';
+        generateBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+
+</html>
